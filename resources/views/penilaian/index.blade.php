@@ -1,7 +1,8 @@
 @extends('layout.admin')
 
 @section('content')
-<h3>Matrix Penilaian</h3>
+
+<h3 class="mb-4">Matrix Penilaian</h3>
 
 @if(session('success'))
 <div class="alert alert-success">{{ session('success') }}</div>
@@ -11,38 +12,82 @@
 <div class="alert alert-danger">{{ session('error') }}</div>
 @endif
 
+{{-- 🔥 INFO SKALA --}}
+<div class="alert alert-info">
+    Gunakan skala <strong>1 - 6</strong><br>
+    1 = Sangat Rendah / Tidak Baik<br>
+    6 = Sangat Tinggi / Sangat Baik
+</div>
+
 <form action="{{ route('penilaian.store') }}" method="POST">
     @csrf
 
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Alternatif</th>
-                @foreach($kriterias as $k)
-                <th>{{ $k->nama }}</th>
-                @endforeach
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($alternatifs as $alt)
-            <tr>
-                <td>{{ $alt->nama }}</td>
+    <div class="table-wrapper">
 
-                @foreach($kriterias as $k)
-                @php $key = $alt->id . '-' . $k->id; @endphp
+        <div class="table-scroll">
+            <table class="table-modern">
 
-                <td>
-                    <input type="number" step="0.01" name="nilai[{{ $alt->id }}][{{ $k->id }}]"
-                        value="{{ $penilaians[$key]->nilai ?? '' }}" class="form-control" required>
-                </td>
-                @endforeach
+                <thead>
+                    <tr>
+                        <th style="width:80px;"></th>
+                        <th style="min-width:220px;"></th>
 
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
+                        @foreach($kriterias as $k)
+                        <th class="kriteria-col">{{ $k->kode }}</th>
+                        @endforeach
+                    </tr>
 
-    <button class="btn btn-success">Simpan Penilaian</button>
+                    <tr>
+                        <th></th>
+                        <th>Alternatif</th>
+
+                        @foreach($kriterias as $k)
+                        <th class="kriteria-col">{{ $k->nama }}</th>
+                        @endforeach
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach($alternatifs as $alt)
+                    <tr>
+
+                        <td class="kode-cell">
+                            {{ $alt->kode ?? '-' }}
+                        </td>
+
+                        <td class="nama-cell">
+                            {{ $alt->nama }}
+                        </td>
+
+                        @foreach($kriterias as $k)
+                        @php $key = $alt->id . '-' . $k->id; @endphp
+
+                        <td>
+                            <input type="number" name="nilai[{{ $alt->id }}][{{ $k->id }}]"
+                                value="{{ $penilaians[$key]->nilai ?? '' }}" class="form-control input-nilai" min="1"
+                                max="6" step="1" required>
+                        </td>
+
+                        @endforeach
+
+                    </tr>
+                    @endforeach
+                </tbody>
+
+            </table>
+        </div>
+
+    </div>
+
+    <button class="btn btn-success mt-3">
+        Simpan Penilaian
+    </button>
 
 </form>
+
+{{-- PAGINATION --}}
+<div class="table-footer">
+    <!-- {{ $alternatifs->links() }} -->
+</div>
+
 @endsection

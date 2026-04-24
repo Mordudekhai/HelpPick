@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Alternatif;
 use App\Models\Kriteria;
 use App\Models\Penilaian;
+use App\Models\KriteriaParameter;
 use Illuminate\Http\Request;
 
 class CustomerController extends Controller
@@ -17,21 +18,21 @@ class CustomerController extends Controller
 
     public function hitung(Request $request)
     {
+        /*
+        =========================
+        INPUT BOBOT (WAJIB SAW)
+        =========================
+        */
         $inputBobot = $request->bobot;
 
-        /*
-        |--------------------------------------------------------------------------
-        | STEP 1: VALIDASI INPUT
-        |--------------------------------------------------------------------------
-        */
         if (!$inputBobot || count($inputBobot) == 0) {
-            return back()->with('error', 'Silakan pilih semua kriteria.');
+            return back()->with('error', 'Silakan isi bobot semua kriteria.');
         }
 
         /*
-        |--------------------------------------------------------------------------
-        | STEP 2: MAPPING + LABEL
-        |--------------------------------------------------------------------------
+        =========================
+        KONVERSI SKALA → NILAI
+        =========================
         */
         $mapping = [
             1 => 0.1,
@@ -42,7 +43,7 @@ class CustomerController extends Controller
         ];
 
         $label = [
-            1 => 'Tidak Terlalu Penting',
+            1 => 'Tidak Penting',
             2 => 'Kurang Penting',
             3 => 'Cukup Penting',
             4 => 'Penting',
@@ -52,7 +53,7 @@ class CustomerController extends Controller
         $bobot = [];
         $detailBobot = [];
 
-        foreach ($inputBobot as $key => $val) {
+        foreach ($inputBobot as $kriteria_id => $val) {
 
             if (!isset($mapping[$val])) {
                 return back()->with('error', 'Input bobot tidak valid.');
@@ -60,9 +61,9 @@ class CustomerController extends Controller
 
             $nilai = $mapping[$val];
 
-            $bobot[$key] = $nilai;
+            $bobot[$kriteria_id] = $nilai;
 
-            $detailBobot[$key] = [
+            $detailBobot[$kriteria_id] = [
                 'skala' => $val,
                 'label' => $label[$val],
                 'nilai_awal' => $nilai
@@ -70,40 +71,31 @@ class CustomerController extends Controller
         }
 
         /*
-        |--------------------------------------------------------------------------
-        | STEP 3: NORMALISASI BOBOT
-        |--------------------------------------------------------------------------
+        =========================
+        NORMALISASI BOBOT
+        =========================
         */
         $total = array_sum($bobot);
 
-        if ($total == 0) {
-            return back()->with('error', 'Bobot tidak valid.');
-        }
-
         foreach ($bobot as $k => $v) {
             $normalized = $v / $total;
-
             $bobot[$k] = $normalized;
             $detailBobot[$k]['normalisasi'] = $normalized;
         }
 
         /*
-        |--------------------------------------------------------------------------
-        | STEP 4: AMBIL DATA
-        |--------------------------------------------------------------------------
+        =========================
+        AMBIL DATA
+        =========================
         */
         $kriterias = Kriteria::all();
         $alternatifs = Alternatif::all();
         $penilaians = Penilaian::all();
 
-        if ($kriterias->isEmpty() || $alternatifs->isEmpty()) {
-            return back()->with('error', 'Data alternatif atau kriteria belum lengkap.');
-        }
-
         /*
-        |--------------------------------------------------------------------------
-        | STEP 5: MATRIX
-        |--------------------------------------------------------------------------
+        =========================
+        MATRIX
+        =========================
         */
         $matrix = [];
 
@@ -112,20 +104,20 @@ class CustomerController extends Controller
         }
 
         /*
-        |--------------------------------------------------------------------------
-        | STEP 6: NORMALISASI SAW
-        |--------------------------------------------------------------------------
+        =========================
+        NORMALISASI SAW
+        =========================
         */
         $normalisasi = [];
 
         foreach ($kriterias as $k) {
+
             $values = [];
 
             foreach ($alternatifs as $alt) {
-                if (!isset($matrix[$alt->id][$k->id])) {
-                    continue;
+                if (isset($matrix[$alt->id][$k->id])) {
+                    $values[] = $matrix[$alt->id][$k->id];
                 }
-                $values[] = $matrix[$alt->id][$k->id];
             }
 
             if (empty($values)) continue;
@@ -148,19 +140,20 @@ class CustomerController extends Controller
         }
 
         /*
-        |--------------------------------------------------------------------------
-        | STEP 7: HITUNG SKOR
-        |--------------------------------------------------------------------------
+        =========================
+        HITUNG SKOR SAW
+        =========================
         */
         $hasil = [];
 
         foreach ($alternatifs as $alt) {
+
             $skor = 0;
 
             foreach ($kriterias as $k) {
-                if (!isset($normalisasi[$alt->id][$k->id])) continue;
-
-                $skor += $bobot[$k->id] * $normalisasi[$alt->id][$k->id];
+                if (isset($normalisasi[$alt->id][$k->id])) {
+                    $skor += $bobot[$k->id] * $normalisasi[$alt->id][$k->id];
+                }
             }
 
             $hasil[$alt->id] = $skor;
@@ -169,24 +162,57 @@ class CustomerController extends Controller
         arsort($hasil);
 
         /*
-        |--------------------------------------------------------------------------
-        | STEP 8: KONTRIBUSI (%)
-        |--------------------------------------------------------------------------
+        =========================
+        🔥 AMBIL PEMENANG
+        =========================
+        */
+        $bestId = array_key_first($hasil);
+
+        /*
+        =========================
+        🔥 AMBIL RANGE PARAMETER DARI PEMENANG
+        =========================
+        */
+        $detailRange = [];
+
+        foreach ($kriterias as $k) {
+
+            $nilai = $matrix[$bestId][$k->id] ?? null;
+
+            if ($nilai === null) {
+                $detailRange[$k->id] = null;
+                continue;
+            }
+
+            $param = KriteriaParameter::where('kriteria_id', $k->id)
+                ->where('score', $nilai)
+                ->first();
+
+            if ($param) {
+                $detailRange[$k->id] = [
+                    'min' => $param->min_value,
+                    'max' => $param->max_value,
+                    'label' => $param->label
+                ];
+            } else {
+                $detailRange[$k->id] = null;
+            }
+        }
+
+        /*
+        =========================
+        KONTRIBUSI
+        =========================
         */
         $kontribusi = [];
 
         foreach ($kriterias as $k) {
-            $kontribusi[$k->id] = isset($bobot[$k->id])
-                ? round($bobot[$k->id] * 100, 2)
-                : 0;
+            $kontribusi[$k->id] = round($bobot[$k->id] * 100, 2);
         }
 
-        $topKriteriaId = null;
-
-        if (!empty($kontribusi)) {
-            arsort($kontribusi);
-            $topKriteriaId = array_key_first($kontribusi);
-        }
+        $sorted = $kontribusi;
+        arsort($sorted);
+        $topKriterias = array_slice($sorted, 0, 3, true);
 
         return view('customer.hasil', compact(
             'hasil',
@@ -194,7 +220,9 @@ class CustomerController extends Controller
             'kriterias',
             'detailBobot',
             'kontribusi',
-            'topKriteriaId'
+            'topKriterias',
+            'matrix',
+            'detailRange'
         ));
     }
 }

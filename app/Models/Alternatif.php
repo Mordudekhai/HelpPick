@@ -12,6 +12,7 @@ class Alternatif extends Model
     protected $table = 'alternatifs';
 
     protected $fillable = [
+        'Kode',
         'nama',
     ];
 

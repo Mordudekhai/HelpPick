@@ -7,6 +7,9 @@ use App\Http\Controllers\SawController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\KriteriaController;
+use App\Http\Controllers\KriteriaParameterController;
+use App\Http\Controllers\MappingController; 
+use App\Http\Controllers\AdminController;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,12 +46,11 @@ Route::middleware('admin.auth')->prefix('admin')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Dashboard
+    | Dashboard (🔥 FIX DI SINI)
     |--------------------------------------------------------------------------
     */
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('admin.dashboard');
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])
+        ->name('admin.dashboard');
 
     /*
     |--------------------------------------------------------------------------
@@ -59,24 +61,48 @@ Route::middleware('admin.auth')->prefix('admin')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Kriteria (DITAMBAHKAN - TANPA MENGGANGGU SISTEM)
+    | Kriteria
     |--------------------------------------------------------------------------
     */
     Route::resource('/kriteria', KriteriaController::class);
 
     /*
     |--------------------------------------------------------------------------
-    | Penilaian
+    | PARAMETER KRITERIA
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/kriteria/{id}/parameter', [KriteriaParameterController::class, 'index'])
+        ->name('kriteria.parameter');
+
+    Route::post('/kriteria/{id}/parameter', [KriteriaParameterController::class, 'store'])
+        ->name('kriteria.parameter.store');
+
+    Route::delete('/kriteria-parameter/{id}', [KriteriaParameterController::class, 'destroy'])
+        ->name('kriteria.parameter.delete');
+
+    /*
+    |--------------------------------------------------------------------------
+    | 🔥 MAPPING PARAMETER → ALTERNATIF
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/mapping', [MappingController::class, 'index'])
+        ->name('mapping.index');
+
+    Route::post('/mapping', [MappingController::class, 'store'])
+        ->name('mapping.store');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Penilaian (OPSIONAL)
     |--------------------------------------------------------------------------
     */
     Route::get('/penilaian', [PenilaianController::class, 'index'])->name('penilaian.index');
     Route::post('/penilaian', [PenilaianController::class, 'store'])->name('penilaian.store');
-
 });
 
 /*
 |--------------------------------------------------------------------------
-| SAW (OPTIONAL / DEBUG)
+| SAW (OPTIONAL)
 |--------------------------------------------------------------------------
 */
 Route::get('/hasil', [SawController::class, 'index'])->name('hasil.index');

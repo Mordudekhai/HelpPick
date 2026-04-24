@@ -12,8 +12,9 @@ class Kriteria extends Model
     protected $table = 'kriterias';
 
     protected $fillable = [
+        'kode',
         'nama',
-        'bobot', // tetap dipertahankan
+        'bobot',
         'tipe',
     ];
 
@@ -22,9 +23,9 @@ class Kriteria extends Model
     ];
 
     /*
-    |--------------------------------------------------------------------------
+    |----------------------------------
     | RELATION
-    |--------------------------------------------------------------------------
+    |----------------------------------
     */
     public function penilaians()
     {
@@ -32,10 +33,17 @@ class Kriteria extends Model
     }
 
     /*
-    |--------------------------------------------------------------------------
-    | HELPER
-    |--------------------------------------------------------------------------
+    |----------------------------------
+    | AUTO DELETE RELASI (SAFE)
+    |----------------------------------
     */
+    protected static function booted()
+    {
+        static::deleting(function ($kriteria) {
+            $kriteria->penilaians()->delete();
+        });
+    }
+
     public function isBenefit()
     {
         return $this->tipe === 'benefit';
@@ -46,13 +54,13 @@ class Kriteria extends Model
         return $this->tipe === 'cost';
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | OPTIONAL (SAFE GUARD)
-    |--------------------------------------------------------------------------
-    */
     public function getBobotAttribute($value)
     {
         return $value ?? 0;
+    }
+
+    public function parameters()
+    {
+        return $this->hasMany(KriteriaParameter::class);
     }
 }

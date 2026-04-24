@@ -3,6 +3,10 @@
 @section('content')
 <h3>Tambah Kriteria</h3>
 
+<a href="{{ route('kriteria.index') }}" class="btn btn-secondary mb-3">
+    ← Kembali
+</a>
+
 <form action="{{ route('kriteria.store') }}" method="POST">
     @csrf
 
@@ -10,8 +14,6 @@
         <label>Nama</label>
         <input type="text" name="nama" class="form-control" required>
     </div>
-
-    {{-- Bobot DIHAPUS dari input admin (tetap ada di DB) --}}
 
     <div class="mb-3">
         <label>Tipe</label>

@@ -3,6 +3,10 @@
 @section('content')
 <h3>Edit Kriteria</h3>
 
+<a href="{{ route('kriteria.index') }}" class="btn btn-secondary mb-3">
+    ← Kembali
+</a>
+
 <form action="{{ route('kriteria.update', $data->id) }}" method="POST">
     @csrf @method('PUT')
 
@@ -10,8 +14,6 @@
         <label>Nama</label>
         <input type="text" name="nama" value="{{ $data->nama }}" class="form-control" required>
     </div>
-
-    {{-- Bobot DIHAPUS dari form, tapi tetap tersimpan di DB --}}
 
     <div class="mb-3">
         <label>Tipe</label>

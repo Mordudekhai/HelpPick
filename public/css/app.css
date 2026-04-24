@@ -1,0 +1,265 @@
+/* =========================
+   GLOBAL BASE
+========================= */
+html,
+body {
+    height: 100%;
+    margin: 0;
+    font-family: "Inter", sans-serif;
+    background: #f5f7fb;
+    overflow: hidden; /* 🔥 hanya tabel yang boleh scroll */
+}
+
+/* =========================
+   APP LAYOUT
+========================= */
+.app-container {
+    height: 100vh;
+    display: flex;
+}
+
+/* =========================
+   SIDEBAR
+========================= */
+.sidebar {
+    width: 230px;
+    background: linear-gradient(180deg, #111827, #1f2937);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.sidebar h5 {
+    font-weight: 600;
+}
+
+.sidebar a {
+    text-decoration: none;
+    color: #cbd5e1;
+    padding: 10px 12px;
+    border-radius: 8px;
+    display: block;
+    margin-bottom: 6px;
+    transition: 0.2s;
+}
+
+.sidebar a:hover {
+    background: #374151;
+    color: #fff;
+}
+
+/* =========================
+   MAIN CONTENT
+========================= */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: 30px;
+    overflow: hidden;
+}
+
+/* =========================
+   CONTENT BODY
+========================= */
+.content-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* =========================
+   CARD
+========================= */
+.card-modern {
+    background: #fff;
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* =========================
+   BUTTON
+========================= */
+.btn {
+    border-radius: 8px !important;
+}
+
+/* =========================
+   FORM
+========================= */
+.form-control {
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    transition: 0.2s;
+}
+
+.form-control:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+/* =========================
+   TABLE SYSTEM (FULL VIEWPORT)
+========================= */
+
+/* wrapper utama */
+.table-page {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* area tabel */
+.table-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* scroll hanya di sini */
+.table-scroll {
+    flex: 1;
+    overflow: auto;
+    border-radius: 14px;
+    border: 1px solid #e5e7eb;
+}
+
+/* SCROLLBAR */
+.table-scroll::-webkit-scrollbar {
+    height: 10px;
+}
+
+.table-scroll::-webkit-scrollbar-track {
+    background: #e5e7eb;
+    border-radius: 10px;
+}
+
+.table-scroll::-webkit-scrollbar-thumb {
+    background: #9ca3af;
+    border-radius: 10px;
+}
+
+/* =========================
+   TABLE MODERN
+========================= */
+.table-modern {
+    width: 100%;
+    min-width: 1000px;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #fff;
+}
+
+/* HEADER */
+.table-modern thead {
+    background: linear-gradient(to bottom, #f8fafc, #eef2f7);
+}
+
+.table-modern th {
+    width: 110px;
+    min-width: 110px;
+    max-width: 110px;
+    text-align: center;
+    vertical-align: middle;
+    font-weight: 600;
+    padding: 14px;
+    border: 1px solid #e5e7eb;
+    white-space: nowrap;
+}
+
+/* BODY */
+.table-modern td {
+    width: 150px;
+    min-width: 150px;
+    max-width: 150px;
+    text-align: center;
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    vertical-align: middle;
+}
+
+/* KODE */
+.kode-cell {
+    text-align: center;
+    font-weight: 600;
+    background: #f9fafb;
+}
+
+/* NAMA */
+.nama-cell {
+    text-align: left;
+}
+
+/* KOLOM NAMA */
+.table-modern th:nth-child(2),
+.table-modern td:nth-child(2) {
+    min-width: 220px;
+    max-width: 220px;
+    text-align: left;
+}
+
+/* KOLOM KODE */
+.table-modern th:first-child,
+.table-modern td:first-child {
+    width: 80px;
+    min-width: 80px;
+    max-width: 80px;
+    text-align: center;
+    font-weight: 600;
+}
+
+/* STRIPE */
+.table-modern tbody tr:nth-child(even) {
+    background: #fafafa;
+}
+
+/* HOVER */
+.table-modern tbody tr:hover {
+    background: #f1f5f9;
+}
+
+/* =========================
+   INPUT
+========================= */
+.input-nilai {
+    width: 55px;
+    height: 36px;
+    margin: auto;
+    display: block;
+    text-align: center;
+    padding: 0;
+}
+
+/* =========================
+   PAGINATION (FIX BAWAH)
+========================= */
+.table-footer {
+    padding-top: 15px;
+    display: flex;
+    justify-content: center;
+}
+
+.pagination {
+    justify-content: center;
+}
+
+.pagination .page-link {
+    border-radius: 8px !important;
+}
+
+/* =========================
+   FOOTER
+========================= */
+.sidebar-footer {
+    margin-top: auto;
+}

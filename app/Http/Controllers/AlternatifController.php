@@ -9,7 +9,9 @@ class AlternatifController extends Controller
 {
     public function index()
     {
-        $data = Alternatif::latest()->get();
+        $data = Alternatif::orderByRaw('CAST(SUBSTRING(kode, 2) AS UNSIGNED) ASC')
+            ->paginate(10); // 🔥 FIX
+
         return view('alternatif.index', compact('data'));
     }
 
@@ -24,7 +26,20 @@ class AlternatifController extends Controller
             'nama' => 'required|string|max:255',
         ]);
 
-        Alternatif::create($request->only('nama'));
+        // AUTO GENERATE KODE (AMAN)
+        $last = Alternatif::orderByRaw('CAST(SUBSTRING(kode, 2) AS UNSIGNED) DESC')->first();
+
+        if ($last && $last->kode) {
+            $lastNumber = (int) str_replace('A', '', $last->kode);
+            $newKode = 'A' . ($lastNumber + 1);
+        } else {
+            $newKode = 'A1';
+        }
+
+        Alternatif::create([
+            'kode' => $newKode,
+            'nama' => $request->nama
+        ]);
 
         return redirect()->route('alternatif.index')->with('success', 'Data berhasil ditambahkan');
     }
@@ -42,7 +57,10 @@ class AlternatifController extends Controller
         ]);
 
         $data = Alternatif::findOrFail($id);
-        $data->update($request->only('nama'));
+
+        $data->update([
+            'nama' => $request->nama
+        ]);
 
         return redirect()->route('alternatif.index')->with('success', 'Data berhasil diupdate');
     }
@@ -50,6 +68,7 @@ class AlternatifController extends Controller
     public function destroy($id)
     {
         Alternatif::findOrFail($id)->delete();
+
         return redirect()->route('alternatif.index')->with('success', 'Data berhasil dihapus');
     }
 }
